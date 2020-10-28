@@ -10,12 +10,12 @@ function uploadPathResolver(filename) {
   return path.resolve(__dirname, "../uploads", filename);
 }
 
-module.exports = function imageProcessor(filename) {
+function imageProcessor(filename) {
   const sourcePath = uploadPathResolver(filename);
   const resizedDestination = uploadPathResolver("resized-" + filename);
   const monochromeDestination = uploadPathResolver("monochrome-" + filename);
-  var resizeWorkerFinished = false;
-  var monochromeWorkerFinished = false;
+  let resizeWorkerFinished = false;
+  let monochromeWorkerFinished = false;
   return new Promise((resolve, reject) => {
     if (isMainThread) {
       try {
@@ -42,11 +42,11 @@ module.exports = function imageProcessor(filename) {
           reject(new Error(err.message));
         });
 
-        resizeWorker.on('exit', (code) => {
-            if(code !== 0){
-                reject(new Error("Exited with status code" + " " + code))
-            }
-        })
+        resizeWorker.on("exit", (code) => {
+          if (code !== 0) {
+            reject(new Error("Exited with status code" + " " + code));
+          }
+        });
 
         monochromeWorker.on("message", (message) => {
           monochromeWorkerFinished = true;
@@ -59,11 +59,11 @@ module.exports = function imageProcessor(filename) {
           reject(new Error(err.message));
         });
 
-        monochromeWorker.on('exit', (code) => {
-            if(code !== 0){
-                reject(new Error("Exited with status code" + " " + code))
-            }
-        })
+        monochromeWorker.on("exit", (code) => {
+          if (code !== 0) {
+            reject(new Error("Exited with status code" + " " + code));
+          }
+        });
       } catch (error) {
         reject(error);
       }
@@ -71,4 +71,6 @@ module.exports = function imageProcessor(filename) {
       reject(new Error("not on main thread"));
     }
   });
-};
+}
+
+module.exports = imageProcessor;
